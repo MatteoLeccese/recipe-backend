@@ -1,0 +1,84 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Identity and Access
+model User {
+  id        String    @id @default(uuid())
+  fullName  String
+  email     String    @unique
+  password  String
+  role      String    @default("user") // "user" | "admin"
+  recipes   Recipe[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+// Recipe Core
+model Recipe {
+  id           String             @id @default(uuid())
+  name         String
+  preparation  String             // Text
+  authorId     String?
+  author       User?              @relation(fields: [authorId], references: [id])
+  status       RecipeStatus       @default(PUBLISHED)
+  images       RecipeImage[]      // 1-5 images
+  ingredients  RecipeIngredient[]
+  tags         TagsOnRecipes[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  deletedAt    DateTime?
+}
+
+// Image Management (Cloudinary)
+model RecipeImage {
+  id       String @id @default(uuid())
+  url      String
+  publicId String // For Cloudinary deletion
+  order    Int    @default(0) // 0 is main image
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+// Ingredients (Normalized)
+model Ingredient {
+  id      String             @id @default(uuid())
+  name    String             @unique
+  recipes RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id           String     @id @default(uuid())
+  recipeId     String
+  ingredientId String
+  quantity     Float      // Base value always in GRAMS
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+// Tags (Many-to-Many)
+model Tag {
+  id      String          @id @default(uuid())
+  name    String          @unique
+  recipes TagsOnRecipes[]
+}
+
+model TagsOnRecipes {
+  recipeId String
+  tagId    String
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  tag      Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([recipeId, tagId])
+}
+
+enum RecipeStatus {
+  DRAFT
+  PUBLISHED
+}
