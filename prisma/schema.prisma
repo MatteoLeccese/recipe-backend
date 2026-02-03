@@ -27,7 +27,7 @@ model Recipe {
   preparation  String             // Text
   authorId     String?
   author       User?              @relation(fields: [authorId], references: [id])
-  status       RecipeStatus       @default(PUBLISHED)
+  status       String             @default("PUBLISHED") // CHECK (status IN ('DRAFT', 'PUBLISHED'))
   images       RecipeImage[]      // 1-5 images
   ingredients  RecipeIngredient[]
   tags         TagsOnRecipes[]
@@ -76,9 +76,4 @@ model TagsOnRecipes {
   tag      Tag    @relation(fields: [tagId], references: [id])
 
   @@id([recipeId, tagId])
-}
-
-enum RecipeStatus {
-  DRAFT
-  PUBLISHED
 }
