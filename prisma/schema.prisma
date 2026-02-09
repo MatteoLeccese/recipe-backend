@@ -1,6 +1,5 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -22,18 +21,18 @@ model User {
 
 // Recipe Core
 model Recipe {
-  id           String             @id @default(uuid())
-  name         String
-  preparation  String             // Text
-  authorId     String?
-  author       User?              @relation(fields: [authorId], references: [id])
-  status       String             @default("PUBLISHED") // CHECK (status IN ('DRAFT', 'PUBLISHED'))
-  images       RecipeImage[]      // 1-5 images
-  ingredients  RecipeIngredient[]
-  tags         TagsOnRecipes[]
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  deletedAt    DateTime?
+  id          String             @id @default(uuid())
+  name        String
+  preparation String // Text
+  authorId    String?
+  author      User?              @relation(fields: [authorId], references: [id])
+  status      String             @default("PUBLISHED") // CHECK (status IN ('DRAFT', 'PUBLISHED'))
+  images      RecipeImage[] // 1-5 images
+  ingredients RecipeIngredient[]
+  tags        TagsOnRecipes[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
 }
 
 // Image Management (Cloudinary)
@@ -57,7 +56,7 @@ model RecipeIngredient {
   id           String     @id @default(uuid())
   recipeId     String
   ingredientId String
-  quantity     Float      // Base value always in GRAMS
+  quantity     Float // Base value always in GRAMS
   recipe       Recipe     @relation(fields: [recipeId], references: [id])
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
 }
